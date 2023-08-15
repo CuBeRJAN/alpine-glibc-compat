@@ -1,0 +1,70 @@
+#!/bin/bash
+
+CHR_PATH="/var/glibc-chroot"
+
+invoke_cmd () {
+    bwrap --bind "$CHR_PATH" / \
+	  --dev-bind /dev /dev \
+	  --proc /proc \
+	  --bind /sys /sys \
+	  --bind /run /run \
+	  --bind /home /home \
+	  --ro-bind /etc/resolv.conf /etc/resolv.conf \
+	  --ro-bind /etc/passwd /etc/passwd \
+	  --ro-bind /etc/group /etc/group \
+	  "$@"
+}
+
+invoke_cmd_as_root () {
+    mountpoint -q "$CHR_PATH"/dev || doas mount --bind /dev "$CHR_PATH"/dev
+    mountpoint -q "$CHR_PATH"/proc|| doas mount --bind /proc "$CHR_PATH"/proc
+    doas chroot "$CHR_PATH" "$@"
+}
+
+create_chroot () {
+    echo "initalizing chroot in $CHR_PATH"
+    doas mkdir -p "$CHR_PATH"
+    doas debootstrap --arch amd64 stable "$CHR_PATH" "https://deb.debian.org/debian"
+}
+
+invoke_wrapper () {
+    if [ ! -d "$CHR_PATH" ]; then
+	echo "Chroot doesn't exist. Create it with 'glibc-compat --create'"
+    else
+	if [ "$#" -gt 1 ]; then
+	    "$@"
+	else
+	    echo "No command specified, entering chroot."
+	    "$@" /bin/bash
+	fi
+    fi
+}
+
+umount_chroot () {
+    mountpoint -q "$CHR_PATH"/dev || doas umount "$CHR_PATH"/dev
+    mountpoint -q "$CHR_PATH"/proc || doas umount "$CHR_PATH"/proc
+}
+
+destroy_chroot () {
+    umount_chroot
+    doas rm -rf "$CHR_PATH"
+}
+
+help_print () {
+    echo \
+	"usage: glibc-compat (--option) (extra arguments):
+	  --create    - create the chroot
+	  --root      - run command as root
+	  --umount    - unmount chroot
+	  --destroy   - destroy chroot
+	  --help      - print help"
+}
+
+case "$1" in
+    --root) shift && invoke_wrapper invoke_cmd_as_root "$@" ;;
+    --create) create_chroot ;;
+    --umount) umount_chroot ;;
+    --destroy) destroy_chroot ;;
+    --help) help_print ;;
+    *) invoke_wrapper invoke_cmd "$@" ;;
+esac
