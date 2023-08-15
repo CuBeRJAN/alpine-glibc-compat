@@ -8,6 +8,7 @@ Chroot path defaults to ~/var/glibc-chroot~.
 * Dependencies
 - ~doas~ - has to be set up for your user
 - ~bubblewrap~
+- ~debootstrap~
 
 * Installation
 Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~
