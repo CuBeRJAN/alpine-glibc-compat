@@ -3,6 +3,10 @@
 CHR_PATH="/var/glibc-chroot"
 
 invoke_cmd () {
+    if [ $(id -u) -eq 0 ]; then
+	echo "to invoke as root use --root"
+	exit 1
+    fi
     bwrap --bind "$CHR_PATH" / \
 	  --dev-bind /dev /dev \
 	  --proc /proc \
@@ -16,15 +20,23 @@ invoke_cmd () {
 }
 
 invoke_cmd_as_root () {
-    mountpoint -q "$CHR_PATH"/dev || doas mount --bind /dev "$CHR_PATH"/dev
-    mountpoint -q "$CHR_PATH"/proc|| doas mount --bind /proc "$CHR_PATH"/proc
-    doas chroot "$CHR_PATH" "$@"
+    if [ ! $(id -u) -eq 0 ]; then
+	echo "--root requires root privileges"
+	exit 1
+    fi
+    mountpoint -q "$CHR_PATH"/dev || mount --bind /dev "$CHR_PATH"/dev
+    mountpoint -q "$CHR_PATH"/proc|| mount --bind /proc "$CHR_PATH"/proc
+    chroot "$CHR_PATH" "$@"
 }
 
 create_chroot () {
+    if [ ! $(id -u) -eq 0 ]; then
+	echo "--create requires root privileges"
+	exit 1
+    fi
     echo "initalizing chroot in $CHR_PATH"
-    doas mkdir -p "$CHR_PATH"
-    doas debootstrap --arch amd64 stable "$CHR_PATH" "https://deb.debian.org/debian"
+    mkdir -p "$CHR_PATH"
+    debootstrap --arch amd64 stable "$CHR_PATH" "https://deb.debian.org/debian"
 }
 
 invoke_wrapper () {
@@ -41,13 +53,24 @@ invoke_wrapper () {
 }
 
 umount_chroot () {
-    mountpoint -q "$CHR_PATH"/dev || doas umount "$CHR_PATH"/dev
-    mountpoint -q "$CHR_PATH"/proc || doas umount "$CHR_PATH"/proc
+    if [ ! $(id -u) -eq 0 ]; then
+	echo "--umount requires root privileges"
+	exit 1
+    fi
+    mountpoint -q "$CHR_PATH"/dev || umount "$CHR_PATH"/dev
+    mountpoint -q "$CHR_PATH"/proc || umount "$CHR_PATH"/proc
 }
 
 destroy_chroot () {
+    if [ ! $(id -u) -eq 0 ]; then
+	echo "--destroy requires root privileges"
+	exit 1
+    fi
     umount_chroot
-    doas rm -rf "$CHR_PATH"
+    rm -rf --one-file-system "$CHR_PATH"
+    if [ -d "$CHR_PATH" ]; then
+	echo "failed to remove chroot - are there mounts left?"
+    fi
 }
 
 help_print () {
@@ -59,11 +82,6 @@ help_print () {
 	  --destroy   - destroy chroot
 	  --help      - print help"
 }
-
-if [ $(id -u) -eq 0 ]; then
-    echo "please don't invoke this script as root"
-    exit 1
-fi
 
 case "$1" in
     --root) shift && invoke_wrapper invoke_cmd_as_root "$@" ;;

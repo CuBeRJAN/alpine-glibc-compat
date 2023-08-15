@@ -6,25 +6,38 @@ This is a small wrapper used to set up a Debian chroot on Alpine. It can be used
 Chroot path defaults to ~/var/glibc-chroot~.
 
 * Dependencies
-- ~doas~ - has to be set up for your user
 - ~bubblewrap~
 - ~debootstrap~
+- ~bash~
+
+#+begin_src bash
+  apk add bubblewrap debootstrap bash
+#+end_src
 
 * Installation
-Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~
+Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~ like so:
+
+#+begin_src bash
+  curl https://raw.githubusercontent.com/CuBeRJAN/alpine-glibc-compat/main/glibc-compat -o /usr/local/bin/glibc-compat \
+       && chmod +x /usr/local/bin/glibc-compat 
+#+end_src
 
 * Usage
 #+begin_src sh
-  usage: glibc-compat (--option) (extra arguments):
-	    --create	- create the chroot
-	    --root	- run command as root
-	    --umount	- unmount chroot
-	    --destroy	- destroy chroot
+  usage: glibc-compat (--option) (command):
+	    --create	- create the chroot (requires root)
+	    --root	- run command as root (requires root)
+	    --umount	- unmount chroot (requires root)
+	    --destroy	- destroy chroot (requires root)
 	    --help	- print help
 #+end_src
 
-* Tips
-- Don't invoke with ~doas~ or ~sudo~, the script will elevate permissions if it needs to.
+* Notes
 - For GPU support install your GPU driver inside the chroot.
-- Install your sound server inside the chroot for audio - in the case of pipewire ~glibc-compat --root apt install pipewire~
+- For sound install your audio server inside the chroot (in the case of Pipewire ~glibc-compat --root apt install pipewire~)
 - For certain ~UTF-8~ languages you might have to add the ~locales~, ~locales-all~ packages, then also set you LANG to utf8 when calling the command ~LANG=en_US.UTF-8 glibc-compat~
+- You can mount additional directories like so, but they *MUST* be unmounted when destroying the chroot:
+ #+begin_src bash
+   mount --bind /home /var/glibc-chroot/mnt
+   umount /var/glibc-chroot/mnt
+ #+end_src
