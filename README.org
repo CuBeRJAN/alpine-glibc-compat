@@ -14,14 +14,17 @@ Chroot path defaults to ~/var/glibc-chroot~.
 Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~
 
 * Usage
-usage: glibc-compat (--option) (extra arguments):
-          --create	- create the chroot
-          --root		- run command as root
-          --umount	- unmount chroot
-          --destroy	- destroy chroot
-          --help		- print help
+#+begin_src sh
+  usage: glibc-compat (--option) (extra arguments):
+	    --create	- create the chroot
+	    --root	- run command as root
+	    --umount	- unmount chroot
+	    --destroy	- destroy chroot
+	    --help	- print help
+#+end_src
 
 * Tips
+- Don't invoke with ~doas~ or ~sudo~, the script will elevate permissions if it needs to.
 - For GPU support install your GPU driver inside the chroot.
 - Install your sound server inside the chroot for audio - in the case of pipewire ~glibc-compat --root apt install pipewire~
 - For certain ~UTF-8~ languages you might have to add the ~locales~, ~locales-all~ packages, then also set you LANG to utf8 when calling the command ~LANG=en_US.UTF-8 glibc-compat~
