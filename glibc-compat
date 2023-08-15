@@ -76,10 +76,10 @@ destroy_chroot () {
 help_print () {
     echo \
 	"usage: glibc-compat (--option) (extra arguments):
-	  --create    - create the chroot
-	  --root      - run command as root
-	  --umount    - unmount chroot
-	  --destroy   - destroy chroot
+	  --create    - create the chroot (requires root)
+	  --root      - run command as root (requires root)
+	  --umount    - unmount chroot (requires root)
+	  --destroy   - destroy chroot (requires root)
 	  --help      - print help"
 }
 
