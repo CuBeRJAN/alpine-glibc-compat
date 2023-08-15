@@ -1,0 +1,25 @@
+#+title: Alpine Glibc chroot wrapper
+#+author: lambdanil
+
+This is a small wrapper used to set up a Debian chroot on Alpine. It can be used to run Glibc-only binaries.
+
+Chroot path defaults to ~/var/glibc-chroot~.
+
+* Dependencies
+- ~doas~ - has to be set up for your user
+- ~bubblewrap~
+
+* Installation
+Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~
+
+* Usage
+usage: glibc-compat (--option) (extra arguments):
+          --create	- create the chroot
+          --root		- run command as root
+          --umount	- unmount chroot
+          --destroy	- destroy chroot
+          --help		- print help
+
+* Tips
+- For GPU support install your GPU driver inside the chroot.
+- Install your sound server inside the chroot for audio - in the case of pipewire ~glibc-compat --root apt install pipewire~
