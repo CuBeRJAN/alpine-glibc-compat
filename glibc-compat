@@ -60,6 +60,11 @@ help_print () {
 	  --help      - print help"
 }
 
+if [ $(id -u) -eq 0 ]; then
+    echo "please don't invoke this script as root"
+    exit 1
+fi
+
 case "$1" in
     --root) shift && invoke_wrapper invoke_cmd_as_root "$@" ;;
     --create) create_chroot ;;
