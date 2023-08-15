@@ -24,3 +24,4 @@ usage: glibc-compat (--option) (extra arguments):
 * Tips
 - For GPU support install your GPU driver inside the chroot.
 - Install your sound server inside the chroot for audio - in the case of pipewire ~glibc-compat --root apt install pipewire~
+- For certain ~UTF-8~ languages you might have to add the ~locales~, ~locales-all~ packages, then also set you LANG to utf8 when calling the command ~LANG=en_US.UTF-8 glibc-compat~
