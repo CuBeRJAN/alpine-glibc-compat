@@ -18,7 +18,7 @@ Chroot path defaults to ~/var/glibc-chroot~.
 Copy the script somewhere into your $PATH, ideally ~/usr/local/bin~ like so (run as root!):
 
 #+begin_src bash
-  curl https://raw.githubusercontent.com/CuBeRJAN/alpine-glibc-compat/main/glibc-compat -o /usr/local/bin/glibc-compat \
+  curl https://raw.githubusercontent.com/lambdanil/alpine-glibc-compat/main/glibc-compat -o /usr/local/bin/glibc-compat \
        && chmod +x /usr/local/bin/glibc-compat 
 #+end_src
 
